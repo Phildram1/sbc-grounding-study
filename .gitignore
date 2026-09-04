@@ -1,0 +1,6 @@
+.env
+__pycache__/
+results/*.jsonl
+results/*.json
+!results/.gitkeep
+.ipynb_checkpoints/

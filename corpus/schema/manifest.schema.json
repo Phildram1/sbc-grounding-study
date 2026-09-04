@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["version", "configs"],
+  "properties": {
+    "version": {"type": "string"},
+    "configs": {"type": "array", "items": {"type": "object",
+      "required": ["id", "kind", "profile", "path", "sha256"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^(V\\d{2}|F[ABCDEFGS]\\d|S\\d{2})$"},
+        "kind": {"enum": ["valid", "fault", "silence"]},
+        "profile": {"enum": ["direct_routing", "carrier_trunk", "hybrid", "ha_pair"]},
+        "parent": {"type": "string"},
+        "path": {"type": "string"},
+        "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}}}}
+  }
+}

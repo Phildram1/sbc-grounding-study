@@ -1,0 +1,6 @@
+anthropic>=0.40
+pyyaml
+numpy
+scipy
+pytest
+jsonschema

@@ -1,0 +1,19 @@
+# Frozen at tag prereg-v1. Any change after the tag invalidates the run.
+models:
+  low_cost: claude-haiku-4-5-20251001
+  strong:   claude-sonnet-5
+arms:
+  A: {input: raw,      model: low_cost, reps: 3, prompt: prompts/arm_raw.md}
+  B: {input: raw,      model: strong,   reps: 3, prompt: prompts/arm_raw.md}
+  C: {input: grounded, model: low_cost, reps: 3, prompt: prompts/arm_grounded.md}
+  E: {input: engine,   model: null,     reps: 1, prompt: null}
+llm:
+  temperature: 0.0
+  max_tokens: 4000
+  max_retries: 3
+  json_repair_attempts: 1
+pricing:                       # USD per million tokens — FILL IN and record source + retrieval date
+  claude-haiku-4-5-20251001: {input: null, output: null}
+  claude-sonnet-5:           {input: null, output: null}
+  source_url: "https://www.anthropic.com/pricing"
+  retrieved: null

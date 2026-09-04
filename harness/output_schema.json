@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["verdict", "findings", "remediation", "confidence_statement"],
+  "properties": {
+    "verdict": {"enum": ["PASS", "REVIEW", "BLOCK"]},
+    "findings": {"type": "array", "items": {"type": "object",
+      "required": ["domain", "location", "description", "severity", "evidence"],
+      "properties": {
+        "domain": {"enum": ["A", "B", "C", "D", "E", "F", "G", "S"]},
+        "location": {"type": "string", "description": "section/param as it appears in the configuration"},
+        "description": {"type": "string"},
+        "severity": {"enum": ["REVIEW", "BLOCK"]},
+        "undeterminable": {"type": "boolean", "description": "true if this cannot be proven from the configuration alone"},
+        "evidence": {"type": "array", "items": {"type": "object",
+          "required": ["param", "value"],
+          "properties": {"param": {"type": "string"}, "value": {"type": "string"}}}}}}},
+    "remediation": {"type": "array", "items": {"type": "object",
+      "required": ["finding_index", "action"],
+      "properties": {"finding_index": {"type": "integer"}, "action": {"type": "string"},
+                     "change_safety": {"enum": ["safe", "service_affecting", "unknown"]}}}},
+    "confidence_statement": {"type": "string"}
+  }
+}

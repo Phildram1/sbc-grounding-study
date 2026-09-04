@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": {"type": "object",
+    "required": ["expected_verdict", "faults", "verified_by"],
+    "properties": {
+      "expected_verdict": {"enum": ["PASS", "REVIEW", "BLOCK"]},
+      "undeterminable": {"type": "boolean"},
+      "probe_fact": {"type": "string"},
+      "faults": {"type": "array", "items": {"type": "object",
+        "required": ["fault_id", "domain", "location", "difficulty", "canonical_remediation"],
+        "properties": {
+          "fault_id": {"type": "string"},
+          "domain": {"enum": ["A", "B", "C", "D", "E", "F", "G", "S"]},
+          "location": {"type": "string"},
+          "difficulty": {"enum": ["obvious", "subtle"]},
+          "canonical_remediation": {"type": "string"},
+          "source": {"type": "string"}}}},
+      "verified_by": {"type": "array", "items": {"type": "string"}, "minItems": 1}}}
+}

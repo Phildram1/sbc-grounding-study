@@ -1,0 +1,9 @@
+{
+  "V01": {"expected_verdict": "PASS", "faults": [], "verified_by": ["PD"]},
+  "FC1": {"expected_verdict": "BLOCK", "faults": [{"fault_id": "FC1", "domain": "C",
+          "location": "TLSContexts/TLSVersion", "difficulty": "obvious",
+          "canonical_remediation": "Set TLSVersion to TLS 1.2 only on the Microsoft-facing TLS context.",
+          "source": "learn.microsoft.com direct-routing-plan"}], "verified_by": ["PD"]},
+  "S01": {"expected_verdict": "REVIEW", "undeterminable": true, "faults": [],
+          "probe_fact": "Certificate chain validity — PEM not present in export", "verified_by": ["PD"]}
+}
