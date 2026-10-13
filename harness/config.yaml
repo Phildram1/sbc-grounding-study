@@ -7,6 +7,13 @@ arms:
   B: {input: raw,      model: strong,   reps: 3, prompt: prompts/arm_raw.md}
   C: {input: grounded, model: low_cost, reps: 3, prompt: prompts/arm_grounded.md}
   E: {input: engine,   model: null,     reps: 1, prompt: null}
+engine:                        # frozen at prereg-v1 — the wheel and ruleset hashes ARE the engine version
+  package: sbc-autoops-validator
+  version: "0.20.0"
+  wheel_sha256: "6ed6c08efb1b5420ae49d9058891deb6f3365e335f003383c5b302626bafd721"
+  ruleset: ms_direct_routing_2026-06.json
+  ruleset_sha256: "69f5af9dbd475cd2a86fe3b9d5856b71e29cf0cfb65a2104c301b1309d56796b"
+  mode: cli
 llm:
   temperature: 0.0
   max_tokens: 4000
