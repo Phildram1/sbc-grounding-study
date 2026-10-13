@@ -26,7 +26,7 @@ python -m pytest tests/                      # isolation + traceability guards
 python harness/run_trials.py --arm A --configs corpus/configs --reps 1 --limit 5 --out results/pilot_A.jsonl
 python scoring/score.py results/pilot_A.jsonl --labels labels/labels.json --out results/pilot_A_scores.json
 ```
-Arms C and E require `SBC_ENGINE_MODE` set (see harness/engine_adapter.py).
+Arms C and E require the SBC-AutoOps engine (proprietary). Install the pinned wheel, then set `SBC_ENGINE_MODE=cli`, `SBC_ENGINE_RULESET=<path to ruleset json>`, `PYTHONUTF8=1`. The Colab notebook's Engine cell does this and verifies both hashes.
 
 ## Build status
 - [x] Pre-registration draft
@@ -34,6 +34,6 @@ Arms C and E require `SBC_ENGINE_MODE` set (see harness/engine_adapter.py).
 - [x] Harness: arms A/B live; C/E adapter interface defined, engine binding pending
 - [x] Scorer: detection, false-positive, determinism, cost, fabrication (auto + coding sheet)
 - [ ] Corpus: 0/60 configs built
-- [ ] Engine binding for C/E
+- [x] Engine binding for C/E (CLI mode; wheel + ruleset pinned by SHA-256 in harness/config.yaml, installed from private Drive — never committed here)
 - [ ] Pilot (5 configs × A/B) run
 - [ ] `prereg-v1` tag

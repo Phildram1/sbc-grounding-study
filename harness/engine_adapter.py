@@ -3,8 +3,8 @@
 The engine (SBC-AutoOps) is proprietary and lives with Metaventions. This module defines the
 interface the harness needs and three bindings selected by SBC_ENGINE_MODE:
 
-  local_mcp   — spawn `sbc-validator mcp` (default offline mode, probe_endpoint disabled) and call
-                validate_config / remediation_plan over stdio. Requires the engine installed locally.
+  cli         — run `sbc-validator validate --ruleset $SBC_ENGINE_RULESET --json` (engine pip-installed).
+                `local_mcp` is accepted as an alias until the MCP stdio client replaces it.
   http        — POST config text to SBC_ENGINE_URL (if the hosted validator exposes an API).
   fixture     — read a pre-recorded engine output from results/engine_cache/{config_id}.json.
                 FOR PILOT PLUMBING ONLY. Scorer refuses to score Arm C/E trials whose
@@ -29,6 +29,23 @@ def _check(out: dict, source: str) -> EngineResult:
     out["engine_source"] = source
     return EngineResult(out)
 
+def _pkg_version() -> str:
+    try:
+        from importlib.metadata import version
+        return version("sbc-autoops-validator")
+    except Exception:
+        return "unknown"
+
+def normalize_cli(raw: dict) -> dict:
+    """Map SBC-AutoOps CLI JSON onto the study's engine-output shape.
+    Drops the run timestamp so identical inputs hash identically (determinism check)."""
+    findings = [{"check_id": f.get("check_id"), "domain": f.get("domain"), "location": f.get("locator") or "",
+                 "severity": f.get("severity"), "description": f.get("title"), "detail": f.get("detail"),
+                 "remediation": f.get("remediation")} for f in raw.get("findings", [])]
+    return {"verdict": raw["summary"]["verdict"], "risk_score": raw["summary"].get("risk_score"),
+            "findings": findings, "call_prediction": raw.get("call_prediction"),
+            "engine_version": f"sbc-autoops-validator {_pkg_version()} ruleset={raw.get('ruleset_version')}"}
+
 def validate(config_id: str, config_text: str) -> EngineResult:
     mode = os.environ.get("SBC_ENGINE_MODE")
     if mode is None:
@@ -44,10 +61,20 @@ def validate(config_id: str, config_text: str) -> EngineResult:
             headers={"Content-Type": "application/json"})
         with urllib.request.urlopen(req, timeout=120) as r:
             return _check(json.loads(r.read()), "http")
-    if mode == "local_mcp":
-        # Minimal stdio call. Replace with the MCP client once the tool surface is confirmed with Dico.
-        cmd = os.environ.get("SBC_ENGINE_CMD", "sbc-validator validate --vendor audiocodes --json -")
-        r = subprocess.run(cmd, shell=True, input=config_text, capture_output=True, text=True, timeout=300)
-        if r.returncode != 0: raise RuntimeError(r.stderr[:500])
-        return _check(json.loads(r.stdout), "local_mcp")
+    if mode in ("cli", "local_mcp"):
+        # SBC-AutoOps CLI: `sbc-validator validate --ruleset <bundle> --json <file>`.
+        # Exit code is non-zero on BLOCK by design, so it is not treated as failure.
+        import tempfile
+        ruleset = os.environ["SBC_ENGINE_RULESET"]          # path to the signed ruleset JSON
+        with tempfile.NamedTemporaryFile("w", suffix=".ini", delete=False, encoding="utf-8") as tf:
+            tf.write(config_text); path = tf.name
+        env = dict(os.environ, PYTHONUTF8="1")
+        r = subprocess.run(["sbc-validator", "validate", "--ruleset", ruleset, "--json", path],
+                           capture_output=True, text=True, timeout=300, env=env, encoding="utf-8")
+        os.unlink(path)
+        try:
+            raw = json.loads(r.stdout)
+        except json.JSONDecodeError:
+            raise RuntimeError(f"engine produced no JSON (rc={r.returncode}): {r.stderr[:500]}")
+        return _check(normalize_cli(raw), "cli")
     raise ValueError(f"unknown SBC_ENGINE_MODE {mode}")
